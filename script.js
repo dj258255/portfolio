@@ -54,56 +54,78 @@ document.addEventListener('DOMContentLoaded', function() {
                     element.classList.add('aos-animate');
                     element.style.animationDelay = delay + 'ms';
                     
+                    // hero-subtitle 색상 특별 처리
+                    if (element.classList.contains('hero-subtitle')) {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        const correctColor = isDark ? '#cbd5e1' : '#64748b';
+                        element.style.setProperty('color', correctColor, 'important');
+                    }
+                    
                     // 특별한 요소들 처리
                     handleSpecialElements(element, true);
                 }, delay);
                 
             } else {
                 // 스크롤 업 시 애니메이션 초기화 (요소가 화면에서 완전히 벗어났을 때)
-                element.classList.remove('aos-animate');
-                element.style.animationDelay = '0ms';
-                
-                // 특별한 요소들 초기화
-                handleSpecialElements(element, false);
+                if (entry.boundingClientRect.top > 0 || entry.boundingClientRect.bottom < 0) {
+                    element.classList.remove('aos-animate');
+                    element.style.animationDelay = '0ms';
+                    
+                    // hero-subtitle 색상 특별 처리
+                    if (element.classList.contains('hero-subtitle')) {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        const correctColor = isDark ? '#cbd5e1' : '#64748b';
+                        element.style.setProperty('color', correctColor, 'important');
+                    }
+                    
+                    // 특별한 요소들 초기화
+                    handleSpecialElements(element, false);
+                }
             }
         });
     }, {
         threshold: 0.15,
-        rootMargin: '0px 0px -100px 0px'
+        rootMargin: '0px 0px -50px 0px'
     });
     
     // 특별한 요소들 처리 함수
     function handleSpecialElements(element, isVisible) {
-        // tech-stack 처리
+        // tech-stack 처리 (빠른 순차 애니메이션)
         if (element.classList.contains('tech-stack')) {
             const techItems = element.querySelectorAll('.tech-item');
             if (isVisible) {
-                setTimeout(() => {
-                    techItems.forEach((item, index) => {
-                        setTimeout(() => {
-                            item.classList.add('slide-up');
-                        }, index * 50);
-                    });
-                }, 100);
+                techItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateY(0) scale(1)';
+                        item.classList.add('slide-up');
+                    }, index * 60); // 빠른 속도
+                });
             } else {
                 techItems.forEach(item => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(30px) scale(0.9)';
                     item.classList.remove('slide-up');
                 });
             }
         }
         
-        // feature-card 순차 애니메이션
+        // feature-card 순차 애니메이션 (features-grid에서 제어)
         if (element.classList.contains('features-grid')) {
             const cards = element.querySelectorAll('.feature-card');
             if (isVisible) {
                 cards.forEach((card, index) => {
                     setTimeout(() => {
-                        card.classList.add('aos-animate');
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0) scale(1)';
+                        card.classList.add('feature-animate');
                     }, index * 200);
                 });
             } else {
                 cards.forEach(card => {
-                    card.classList.remove('aos-animate');
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(80px) scale(0.95)';
+                    card.classList.remove('feature-animate');
                 });
             }
         }
@@ -177,10 +199,146 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         }
+        
+        // hero-title 토스 스타일 애니메이션
+        if (element.classList.contains('hero-title')) {
+            if (isVisible) {
+                // 먼저 기본 페이드인
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+                
+                // 토스 애니메이션 시작
+                setTimeout(() => {
+                    initTossAnimation(element);
+                }, 300);
+            } else {
+                // 애니메이션 초기화
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px)';
+                // 원본 텍스트로 복원
+                const originalText = element.dataset.originalText || element.textContent;
+                if (!element.dataset.originalText) {
+                    element.dataset.originalText = element.textContent;
+                }
+                element.innerHTML = originalText;
+            }
+        }
+        
+        // feature-card 개별 애니메이션 (features-grid에 속하지 않은 경우)
+        if (element.classList.contains('feature-card') && !element.closest('.features-grid')) {
+            if (isVisible) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            } else {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(80px)';
+            }
+        }
+        
+        // project-card 개별 애니메이션
+        if (element.classList.contains('project-card') && !element.closest('.projects-grid')) {
+            if (isVisible) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0) scale(1)';
+            } else {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(40px) scale(0.95)';
+            }
+        }
+        
+        // contact-item 개별 애니메이션
+        if (element.classList.contains('contact-item') && !element.closest('.contact-info')) {
+            if (isVisible) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0) scale(1)';
+            } else {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px) scale(0.9)';
+            }
+        }
+        
+        // tech-item 개별 애니메이션
+        if (element.classList.contains('tech-item')) {
+            if (isVisible) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            } else {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px)';
+            }
+        }
+        
+        // skill-level-guide 애니메이션
+        if (element.classList.contains('skill-level-guide')) {
+            if (isVisible) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            } else {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+            }
+        }
+        
+        // troubleshooting-card 개별 애니메이션
+        if (element.classList.contains('troubleshooting-card')) {
+            if (isVisible) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            } else {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px)';
+            }
+        }
+        
+        // troubleshooting-nav 애니메이션
+        if (element.classList.contains('troubleshooting-nav')) {
+            if (isVisible) {
+                const arrows = element.querySelectorAll('.nav-arrow');
+                const titleItems = element.querySelectorAll('.title-item');
+                
+                // 위쪽 화살표
+                setTimeout(() => {
+                    if (arrows[0]) {
+                        arrows[0].style.opacity = '1';
+                        arrows[0].style.transform = 'translateY(0)';
+                    }
+                }, 100);
+                
+                // 제목들 순차 애니메이션
+                titleItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateX(0)';
+                    }, 200 + (index * 100));
+                });
+                
+                // 아래쪽 화살표
+                setTimeout(() => {
+                    if (arrows[1]) {
+                        arrows[1].style.opacity = '1';
+                        arrows[1].style.transform = 'translateY(0)';
+                    }
+                }, 200 + (titleItems.length * 100));
+                
+            } else {
+                const arrows = element.querySelectorAll('.nav-arrow');
+                const titleItems = element.querySelectorAll('.title-item');
+                
+                arrows.forEach(arrow => {
+                    arrow.style.opacity = '0';
+                    arrow.style.transform = 'translateY(-20px)';
+                });
+                
+                titleItems.forEach(item => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(-30px)';
+                });
+            }
+        }
     }
     
     // 모든 애니메이션 요소들 관찰
-    const animatedElements = document.querySelectorAll('[data-aos], .section-header, .features-grid, .projects-grid, .contact-info, .profile-card, .tech-stack, .about-text, .timeline-section, .timeline-item');
+    const animatedElements = document.querySelectorAll('[data-aos], .section-header, .features-grid, .projects-grid, .contact-info, .profile-card, .tech-stack, .about-text, .timeline-section, .timeline-item, .hero-subtitle, .hero-title, .feature-card, .project-card, .contact-item, .tech-item, .skill-level-guide, .troubleshooting-card, .troubleshooting-nav');
     animatedElements.forEach(el => observer.observe(el));
     
     // 추가 애니메이션 처리 함수
@@ -318,13 +476,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
     
-    // Hero Title 토스 스타일 애니메이션
-    setTimeout(() => {
-        const heroTitle = document.querySelector('.hero-title');
-        if (heroTitle) {
-            initTossAnimation(heroTitle);
-        }
-    }, 500);
+    // Hero Title 초기화 (스크롤 기반 애니메이션으로 변경)
+    const heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) {
+        // 초기 상태로 설정
+        heroTitle.style.opacity = '0';
+        heroTitle.style.transform = 'translateY(30px)';
+    }
+    
+    // Hero Subtitle 초기화 (색상 이슈 방지)
+    const heroSubtitle = document.querySelector('.hero-subtitle');
+    if (heroSubtitle) {
+        // 다크모드 체크
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const defaultColor = isDark ? '#cbd5e1' : '#64748b';
+        
+        heroSubtitle.style.setProperty('color', defaultColor, 'important');
+        
+        // 다크모드 변경 시에도 색상 유지
+        const observer = new MutationObserver(() => {
+            const currentIsDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const currentColor = currentIsDark ? '#cbd5e1' : '#64748b';
+            heroSubtitle.style.setProperty('color', currentColor, 'important');
+        });
+        
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme']
+        });
+    }
 
     function initTossAnimation(element) {
         const text = element.textContent;
@@ -521,4 +701,177 @@ document.addEventListener('keydown', function(e) {
                 break;
         }
     }
+});
+
+// 트러블슈팅 섹션 기능
+let currentTitleIndex = 0;
+let visibleStartIndex = 0;
+const visibleItemsCount = 3;
+let troubleshootingData = [];
+
+// 트러블슈팅 초기화
+function initTroubleshooting() {
+    const titleItems = document.querySelectorAll('.title-item');
+    const cards = document.querySelectorAll('.troubleshooting-card');
+    
+    if (titleItems.length === 0 || cards.length === 0) return;
+    
+    // 데이터 수집
+    troubleshootingData = Array.from(titleItems).map((item, index) => ({
+        titleElement: item,
+        cardElement: cards[index],
+        index: index
+    }));
+    
+    // 초기 화면 설정
+    updateVisibleTitles();
+    showCard(0);
+    
+    // 제목 클릭 이벤트 추가
+    titleItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            selectTitle(index);
+        });
+    });
+}
+
+// 제목 선택
+function selectTitle(index) {
+    currentTitleIndex = index;
+    
+    // 선택된 인덱스가 화면에 보이도록 조정
+    if (index < visibleStartIndex) {
+        visibleStartIndex = index;
+    } else if (index >= visibleStartIndex + visibleItemsCount) {
+        visibleStartIndex = index - visibleItemsCount + 1;
+    }
+    
+    updateVisibleTitles();
+    showCard(index);
+}
+
+// 화면에 보이는 제목들 업데이트
+function updateVisibleTitles() {
+    const titleContainer = document.querySelector('.troubleshooting-titles');
+    if (!titleContainer) return;
+    
+    // 모든 제목 숨기기
+    troubleshootingData.forEach(item => {
+        item.titleElement.style.display = 'none';
+        item.titleElement.classList.remove('active');
+    });
+    
+    // 현재 범위의 제목들만 표시
+    const endIndex = Math.min(visibleStartIndex + visibleItemsCount, troubleshootingData.length);
+    
+    for (let i = visibleStartIndex; i < endIndex; i++) {
+        const item = troubleshootingData[i];
+        item.titleElement.style.display = 'block';
+        
+        // 현재 선택된 제목에 active 클래스 추가
+        if (i === currentTitleIndex) {
+            item.titleElement.classList.add('active');
+        }
+    }
+    
+    // 화살표 버튼 상태 업데이트
+    updateArrowButtons();
+}
+
+// 화살표 버튼 상태 업데이트
+function updateArrowButtons() {
+    const upArrow = document.querySelector('.nav-up');
+    const downArrow = document.querySelector('.nav-down');
+    
+    if (upArrow && downArrow) {
+        // 위 화살표 - 맨 위가 아닐 때만 활성화
+        upArrow.style.opacity = visibleStartIndex > 0 ? '1' : '0.3';
+        upArrow.style.cursor = visibleStartIndex > 0 ? 'pointer' : 'not-allowed';
+        
+        // 아래 화살표 - 맨 아래가 아닐 때만 활성화
+        const canScrollDown = visibleStartIndex + visibleItemsCount < troubleshootingData.length;
+        downArrow.style.opacity = canScrollDown ? '1' : '0.3';
+        downArrow.style.cursor = canScrollDown ? 'pointer' : 'not-allowed';
+    }
+}
+
+// 카드 표시
+function showCard(index) {
+    const cards = document.querySelectorAll('.troubleshooting-card');
+    
+    // 모든 카드 숨기기
+    cards.forEach(card => {
+        card.classList.remove('active');
+    });
+    
+    // 선택된 카드만 표시
+    if (cards[index]) {
+        cards[index].classList.add('active');
+    }
+}
+
+// 스크롤 기능
+function scrollTitles(direction) {
+    if (direction === -1) { // 위로 스크롤
+        if (visibleStartIndex > 0) {
+            visibleStartIndex--;
+            updateVisibleTitles();
+        }
+    } else if (direction === 1) { // 아래로 스크롤
+        if (visibleStartIndex + visibleItemsCount < troubleshootingData.length) {
+            visibleStartIndex++;
+            updateVisibleTitles();
+        }
+    }
+}
+
+// 전역 함수로 등록 (HTML onclick에서 호출)
+window.scrollTitles = scrollTitles;
+
+// 키보드 네비게이션 (트러블슈팅용)
+document.addEventListener('keydown', function(e) {
+    // 트러블슈팅 섹션이 화면에 보일 때만 키보드 네비게이션 활성화
+    const troubleshootingSection = document.getElementById('troubleshooting');
+    if (!troubleshootingSection) return;
+    
+    const rect = troubleshootingSection.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    
+    if (!isVisible) return;
+    
+    switch(e.key) {
+        case 'ArrowUp':
+            if (currentTitleIndex > 0) {
+                selectTitle(currentTitleIndex - 1);
+            }
+            e.preventDefault();
+            break;
+        case 'ArrowDown':
+            if (currentTitleIndex < troubleshootingData.length - 1) {
+                selectTitle(currentTitleIndex + 1);
+            }
+            e.preventDefault();
+            break;
+    }
+});
+
+// 마우스 휠 이벤트 초기화
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.troubleshooting-sidebar');
+    if (sidebar) {
+        sidebar.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            
+            if (e.deltaY > 0) {
+                // 아래로 스크롤
+                scrollTitles(1);
+            } else {
+                // 위로 스크롤
+                scrollTitles(-1);
+            }
+        });
+    }
+    
+    // 트러블슈팅 초기화
+    initTroubleshooting();
 });
