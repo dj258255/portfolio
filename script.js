@@ -110,21 +110,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // feature-card 순차 애니메이션 (features-grid에서 제어)
+        // feature-card 순차 애니메이션 (features-grid에서 제어) - 스크롤 애니메이션만 사용
         if (element.classList.contains('features-grid')) {
             const cards = element.querySelectorAll('.feature-card');
             if (isVisible) {
                 cards.forEach((card, index) => {
                     setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0) scale(1)';
+                        card.classList.add('aos-animate');
                         card.classList.add('feature-animate');
                     }, index * 200);
                 });
             } else {
                 cards.forEach(card => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(80px) scale(0.95)';
+                    card.classList.remove('aos-animate');
                     card.classList.remove('feature-animate');
                 });
             }
@@ -200,22 +198,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // hero-title 토스 스타일 애니메이션
+        // hero-title 토스 애니메이션만 (페이드인 없음)
         if (element.classList.contains('hero-title')) {
             if (isVisible) {
-                // 먼저 기본 페이드인
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
-                
-                // 토스 애니메이션 시작
-                setTimeout(() => {
-                    initTossAnimation(element);
-                }, 300);
+                // 토스 애니메이션만 시작 (이미 보이는 상태에서)
+                initTossAnimation(element);
             } else {
-                // 애니메이션 초기화
-                element.style.opacity = '0';
-                element.style.transform = 'translateY(30px)';
-                // 원본 텍스트로 복원
+                // 원본 텍스트로 복원 (회색 상태)
                 const originalText = element.dataset.originalText || element.textContent;
                 if (!element.dataset.originalText) {
                     element.dataset.originalText = element.textContent;
@@ -476,12 +465,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
     
-    // Hero Title 초기화 (스크롤 기반 애니메이션으로 변경)
+    // Hero Title 초기화 (항상 보이도록 설정)
     const heroTitle = document.querySelector('.hero-title');
     if (heroTitle) {
-        // 초기 상태로 설정
-        heroTitle.style.opacity = '0';
-        heroTitle.style.transform = 'translateY(30px)';
+        // 항상 보이도록 설정
+        heroTitle.style.opacity = '1';
+        heroTitle.style.transform = 'translateY(0)';
+        heroTitle.classList.add('aos-animate');
     }
     
     // Hero Subtitle 초기화 (색상 이슈 방지)
