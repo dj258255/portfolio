@@ -525,7 +525,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 토스 스타일 애니메이션 시작
         setTimeout(() => {
             startTossAnimation(element);
-        }, 300);
+        }, 100);
     }
 
     function startTossAnimation(element) {
@@ -574,6 +574,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         chars.forEach((char, index) => {
+            // "범수" 글자는 더 일찍 시작
+            const isNameChar = char.classList.contains('name-char');
+            const baseDelay = index * 80;
+            const actualDelay = isNameChar ? Math.max(0, baseDelay - 200) : baseDelay;
+            
             setTimeout(() => {
                 // 연두색 조명 효과 시작
                 char.classList.add('highlight');
@@ -587,9 +592,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         char.style.color = 'var(--text-primary)'; // 나머지는 검정색
                     }
-                }, 250); // 그라데이션 효과 지속 시간 (2배 빠르게)
+                }, 200); // 그라데이션 효과 지속 시간
                 
-            }, index * 50); // 각 글자마다 50ms 간격 (2배 빠르게)
+            }, actualDelay);
         });
     }
     
@@ -615,7 +620,68 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         document.body.classList.add('loaded');
     }, 100);
+
+    // 사이드 내비게이션 초기화
+    initSideNavigation();
 });
+
+// 사이드 내비게이션 기능
+function initSideNavigation() {
+    const sideNav = document.querySelector('.side-nav');
+    const sideNavItems = document.querySelectorAll('.side-nav-item');
+    const sections = document.querySelectorAll('section');
+    
+    // 스크롤 시 사이드 내비게이션 표시/숨김 및 활성 섹션 업데이트
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // 스크롤이 100px 이상이면 사이드 내비게이션 표시
+        if (scrollTop > 100) {
+            sideNav.classList.add('visible');
+        } else {
+            sideNav.classList.remove('visible');
+        }
+        
+        // 현재 보이는 섹션 찾기
+        let currentSection = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 150;
+            const sectionHeight = section.clientHeight;
+            
+            if (scrollTop >= sectionTop && scrollTop < sectionTop + sectionHeight) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+        
+        // 활성 내비게이션 아이템 업데이트
+        sideNavItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-section') === currentSection) {
+                item.classList.add('active');
+            }
+        });
+        
+        lastScrollTop = scrollTop;
+    });
+    
+    // 내비게이션 아이템 클릭 이벤트
+    sideNavItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetSection = item.getAttribute('href');
+            const targetElement = document.querySelector(targetSection);
+            
+            if (targetElement) {
+                const offsetTop = targetElement.offsetTop - 70;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+}
 
 // 이미지 모달 기능
 let currentImageIndex = 0;
